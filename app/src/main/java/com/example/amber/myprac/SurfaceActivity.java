@@ -1,12 +1,20 @@
 package com.example.amber.myprac;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,18 +28,24 @@ import java.io.IOException;
 
 public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLoadCompleteListener {
     private static final String TAG = "SurfaceActivity";
-    private boolean mSwitchOn = false;
     /*widget*/
     private MySurfaceView mSurfaceView;
     private SurfaceHolder mHolder;
-    private Button mButton;
     private MediaPlayer mBgPlayer;
     private ImageView mIvBtn;
 
     private SoundPool mSoundPool;
-    private int mSoundId;
-    private int mStreamID;
-    private boolean loaded=false;
+    private boolean loaded = false;
+    private int mSoundOff;
+    private int mSoundOn;
+    private int mStreamOffID;
+    private int mStreamOnID;
+    private boolean isSwitchOn = false;
+    public static Handler mHandler=new Handler();
+
+    private int mProgress;
+    private Intent intent;
+    ProgressReceiver progressReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,53 +53,57 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
         setContentView(R.layout.activity_main);
         /*findviewbyid*/
         mSurfaceView = findViewById(R.id.surface_view);
-//        mButton = findViewById(R.id.surface_switch_btn);
-        mIvBtn=findViewById(R.id.surface_switch_iv);
-       mBgPlayer = new MediaPlayer();
+        mIvBtn = findViewById(R.id.surface_switch_iv);
+        mBgPlayer = new MediaPlayer();
         mHolder = mSurfaceView.getHolder();
         mHolder.setKeepScreenOn(true);
         mHolder.addCallback(new SurfaceViewLis());
         playMayWait();
+        videoPlay(0);
+
+        /*视频播放*/
+        progressReceiver = new ProgressReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.example.amber.myprac.SurfaceActivity");
+        LocalBroadcastManager.getInstance(this).registerReceiver(progressReceiver, intentFilter);
 
         /*设置回调*/
         mIvBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mSwitchOn) {
-                    video_play(0);
-                    mSoundPool.resume(mStreamID);
-//                    mSoundPool.play(mSoundId,1,1,0,-1,1.0f);
-                    mSwitchOn = true;
-
+                if (!isSwitchOn) {
+                    switchOn();
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (isSwitchOn){
+                                    Log.e(TAG, "run: +++++"+isSwitchOn );
+                                    mBgPlayer.stop();
+                                }
+                            }
+                        },3100);
 
                 } else {
-                    Log.e(TAG, "onClick:seekTO0 " );
-                        mBgPlayer.seekTo(0);
-                        mBgPlayer.stop();
-                        mSoundPool.pause(mStreamID);
-                        mSwitchOn=false;
+                    switchOff();
                 }
             }
         });
 
     }
-
     @Override
     public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-        //        if (mSoundPool != null) {
-                mStreamID = mSoundPool.play(mSoundId,1,1,0,-1,1.0f);
-//        }
-        loaded=true;
-
+        loaded = true;
     }
 
     class SurfaceViewLis implements SurfaceHolder.Callback {
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            video_play(0);
+            videoPlay(0);
             mBgPlayer.seekTo(0);
             mBgPlayer.stop();
+
+
         }
 
         @Override
@@ -101,9 +119,10 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
             }
         }
     }
+
     @SuppressLint("ObsoleteSdkInt")
-    private void createSountPool(){
-        if(mSoundPool==null){
+    private void createSountPool() {
+        if (mSoundPool == null) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 AudioAttributes audioAttributes = null;
                 audioAttributes = new AudioAttributes.Builder()
@@ -112,11 +131,11 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
                         .build();
 
                 mSoundPool = new SoundPool.Builder()
-                        .setMaxStreams(1)
+                        .setMaxStreams(2)
                         .setAudioAttributes(audioAttributes)
                         .build();
             } else { // 5.0 以前
-                mSoundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);  // 创建SoundPool
+                mSoundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);  // 创建SoundPool
             }
             mSoundPool.setOnLoadCompleteListener(this);  // 设置加载完成监听
         }
@@ -124,7 +143,7 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
     }
 
 
-    protected void video_play(final int msec) {
+    protected void videoPlay(final int msec) {
 //		// 获取视频文件地址
         try {
             /***/
@@ -153,14 +172,44 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
         }
 
     }
-    public void playMayWait(){
+
+    public void switchOn() {
+        mIvBtn.setBackgroundResource(R.drawable.open);
+        mSoundPool.play(mSoundOn, 1, 1, 0, 0, 1);
+        isSwitchOn = true;
+        videoPlay(0);
+    }
+
+    public void switchOff() {
+        mIvBtn.setBackgroundResource(R.drawable.close);
+        mSoundPool.play(mSoundOff, 1, 1, 0, 0, 1);
+        mBgPlayer.seekTo(0);
+        mBgPlayer.stop();
+        isSwitchOn = false;
+    }
+
+    public void playMayWait() {
         createSountPool();
         try {
-            AssetFileDescriptor fd = this.getAssets().openFd("bg_switch.mp3");
-            mSoundId=mSoundPool.load(fd,1);
+            /*关闭的声音*/
+            mSoundOff = mSoundPool.load(this.getAssets().openFd("music_switch_off.mp3"), 1);
+            /*开启的声音*/
+            mSoundOn = mSoundPool.load(this.getAssets().openFd("music_switch_on.mp3"), 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
+
+    class ProgressReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int progress = intent.getIntExtra("switchProgress", 0);
+            if (progress == 2800) {
+                Log.e(TAG, "onReceive: +++");
+            }
+
+        }
+    }
+
 }

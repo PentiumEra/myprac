@@ -38,14 +38,10 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
     private boolean loaded = false;
     private int mSoundOff;
     private int mSoundOn;
-    private int mStreamOffID;
-    private int mStreamOnID;
-    private boolean isSwitchOn = false;
-    public static Handler mHandler=new Handler();
 
-    private int mProgress;
-    private Intent intent;
-    ProgressReceiver progressReceiver;
+    private boolean isSwitchOn = false;
+    public static Handler mHandler = new Handler();
+    private Runnable r;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,38 +54,40 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
         mHolder = mSurfaceView.getHolder();
         mHolder.setKeepScreenOn(true);
         mHolder.addCallback(new SurfaceViewLis());
-        playMayWait();
         videoPlay(0);
-
-        /*视频播放*/
-        progressReceiver = new ProgressReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.example.amber.myprac.SurfaceActivity");
-        LocalBroadcastManager.getInstance(this).registerReceiver(progressReceiver, intentFilter);
-
+        mBgPlayer.seekTo(0);
+        mBgPlayer.stop();
+        playMayWait();
+        mSurfaceView.setZOrderMediaOverlay(true);
         /*设置回调*/
         mIvBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!isSwitchOn) {
                     switchOn();
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isSwitchOn){
-                                    Log.e(TAG, "run: +++++"+isSwitchOn );
-                                    mBgPlayer.stop();
-                                }
+                    mHandler.removeCallbacks(r);
+                    r = new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isSwitchOn) {
+                                Log.e(TAG, "run: +++++" + isSwitchOn);
+                                mIvBtn.setBackgroundResource(R.drawable.close);
+                                mBgPlayer.seekTo(0);
+                                mBgPlayer.stop();
+                                isSwitchOn = false;
                             }
-                        },3100);
-
+                        }
+                    };
+                    mHandler.postDelayed(r, 3100);
                 } else {
                     switchOff();
+                    mHandler.removeCallbacks(r);
                 }
             }
         });
 
     }
+
     @Override
     public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
         loaded = true;
@@ -99,16 +97,15 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
+            Log.e(TAG, "surfaceCreated: ");
             videoPlay(0);
             mBgPlayer.seekTo(0);
             mBgPlayer.stop();
-
-
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+            Log.e(TAG, "surfaceChanged: ");
         }
 
         @Override
@@ -144,6 +141,7 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
 
 
     protected void videoPlay(final int msec) {
+        Log.e(TAG, "videoPlay: ");
 //		// 获取视频文件地址
         try {
             /***/
@@ -161,7 +159,6 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mBgPlayer.start();
-
                     // 按照初始位置播放
                     mBgPlayer.seekTo(msec);
                 }
@@ -199,17 +196,6 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
             e.printStackTrace();
         }
 
-    }
-
-    class ProgressReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int progress = intent.getIntExtra("switchProgress", 0);
-            if (progress == 2800) {
-                Log.e(TAG, "onReceive: +++");
-            }
-
-        }
     }
 
 }

@@ -30,7 +30,7 @@ public class MvpActivity extends AppCompatActivity implements MvpView{
         mProgress.setCancelable(false);
         mProgress.setMessage("正在加载数据");
         //初始化Presenter
-        mPresenter = new MvpPresenter(this);
+
     }
 
     // button 点击事件调用方法

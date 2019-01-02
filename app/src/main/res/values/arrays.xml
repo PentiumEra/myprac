@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="frame_success">
+        <item>@drawable/cg_00001</item>
+        <item>@drawable/cg_00002</item>
+        <item>@drawable/cg_00003</item>
+        <item>@drawable/cg_00004</item>
+        <item>@drawable/cg_00005</item>
+        <item>@drawable/cg_00006</item>
+        <item>@drawable/cg_00007</item>
+        <item>@drawable/cg_00008</item>
+        <item>@drawable/cg_00009</item>
+        <item>@drawable/cg_00010</item>
+        <item>@drawable/cg_00011</item>
+        <item>@drawable/cg_00012</item>
+        <item>@drawable/cg_00013</item>
+        <item>@drawable/cg_00014</item>
+        <item>@drawable/cg_00015</item>
+        <item>@drawable/cg_00016</item>
+        <item>@drawable/cg_00017</item>
+        <item>@drawable/cg_00018</item>
+        <item>@drawable/cg_00019</item>
+        <item>@drawable/cg_00020</item>
+        <item>@drawable/cg_00021</item>
+        <item>@drawable/cg_00022</item>
+        <item>@drawable/cg_00023</item>
+        <item>@drawable/cg_00024</item>
+        <item>@drawable/cg_00025</item>
+        <item>@drawable/cg_00026</item>
+        <item>@drawable/cg_00027</item>
+        <item>@drawable/cg_00028</item>
+    </string-array>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.amber.view_chapter1.Main2Activity">
+  <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="@drawable/cw_00000"/>
+    <android.support.constraint.Guideline
+        android:id="@+id/gl_content_bottom3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.92"/>
+
+    <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="PRESSS FINGER TO-->
+    <!--UNLOCK     SCREEN"-->
+    <!--android:textStyle="bold"-->
+    <!--android:textColor="#e5ffffff"-->
+    <!--app:layout_constraintBottom_toTopOf="@id/gl_content_bottom3"-->
+    <!--app:layout_constraintHorizontal_bias="0.5"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent" />-->
+    <ImageView
+        android:id="@+id/iv_txt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/txt"/>
+  <Button
+      android:layout_width="match_parent"
+      android:layout_height="50dp"
+      android:id="@+id/btn_switch_on"
+      android:text="switch_on"/>
+  <Button
+      app:layout_constraintTop_toBottomOf="@+id/btn_switch_on"
+      android:layout_width="match_parent"
+      android:layout_height="50dp"
+      android:id="@+id/btn_switch_off"
+      android:text="switch_off"/>
+</android.support.constraint.ConstraintLayout>

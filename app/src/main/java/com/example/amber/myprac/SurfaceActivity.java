@@ -7,6 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -29,9 +34,8 @@ import java.io.IOException;
 public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLoadCompleteListener {
     private static final String TAG = "SurfaceActivity";
     /*widget*/
-    private MySurfaceView mSurfaceView;
+    private SurfaceView mSurfaceView;
     private SurfaceHolder mHolder;
-    private MediaPlayer mBgPlayer;
     private ImageView mIvBtn;
 
     private SoundPool mSoundPool;
@@ -42,23 +46,30 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
     private boolean isSwitchOn = false;
     public static Handler mHandler = new Handler();
     private Runnable r;
+    /*media*/
+    private MyPlayer myPlayer = null;
+
+    private boolean isLoaded = false;
+
+    private ImageView ivBggg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        myPlayer = new MyPlayer();
         /*findviewbyid*/
         mSurfaceView = findViewById(R.id.surface_view);
         mIvBtn = findViewById(R.id.surface_switch_iv);
-        mBgPlayer = new MediaPlayer();
+        ivBggg = findViewById(R.id.iv_bggg);
+        ivBggg.setVisibility(View.INVISIBLE);
+        /*surfaceView*/
         mHolder = mSurfaceView.getHolder();
         mHolder.setKeepScreenOn(true);
         mHolder.addCallback(new SurfaceViewLis());
-        videoPlay(0);
-        mBgPlayer.seekTo(0);
-        mBgPlayer.stop();
         playMayWait();
         mSurfaceView.setZOrderMediaOverlay(true);
+        mHolder.setFormat(PixelFormat.RGB_888);
         /*设置回调*/
         mIvBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,8 +83,9 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
                             if (isSwitchOn) {
                                 Log.e(TAG, "run: +++++" + isSwitchOn);
                                 mIvBtn.setBackgroundResource(R.drawable.close);
-                                mBgPlayer.seekTo(0);
-                                mBgPlayer.stop();
+                                myPlayer.start();
+                                myPlayer.seekTo(0);
+                                myPlayer.pause();
                                 isSwitchOn = false;
                             }
                         }
@@ -85,7 +97,6 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
                 }
             }
         });
-
     }
 
     @Override
@@ -97,10 +108,15 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            Log.e(TAG, "surfaceCreated: ");
-            videoPlay(0);
-            mBgPlayer.seekTo(0);
-            mBgPlayer.stop();
+            Log.e(TAG, "surfaceCreated: +++");
+            myPlayer.setIvBg(ivBggg);
+            myPlayer.play(SurfaceActivity.this, "bg2.mp4", mHolder);
+
+        }
+
+        public Bitmap getBitmapFormResources() {
+            return BitmapFactory.decodeResource(SurfaceActivity.this.getResources(), R.drawable
+                    .bgggg);
         }
 
         @Override
@@ -110,10 +126,10 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            // 销毁SurfaceHolder的时候记录当前的播放位置并停止播放
-            if (mBgPlayer != null && mBgPlayer.isPlaying()) {
-                mBgPlayer.stop();
-            }
+            ivBggg.setVisibility(View.VISIBLE);
+            mSurfaceView.setVisibility(View.INVISIBLE);
+            myPlayer.release();
+            isLoaded = false;
         }
     }
 
@@ -139,49 +155,22 @@ public class SurfaceActivity extends AppCompatActivity implements SoundPool.OnLo
 
     }
 
-
-    protected void videoPlay(final int msec) {
-        Log.e(TAG, "videoPlay: ");
-//		// 获取视频文件地址
-        try {
-            /***/
-            mBgPlayer.reset();
-            //设置音频流类型
-            mBgPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            // 设置播放的视频源
-            AssetFileDescriptor fd = this.getAssets().openFd("bg2.mp4");
-            mBgPlayer.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(),
-                    fd.getLength());
-            // 设置显示视频的SurfaceHolder
-            mBgPlayer.setDisplay(mHolder);//这一步是关键，制定用于显示视频的SurfaceView对象（通过setDisplay（））
-            mBgPlayer.prepare();
-            mBgPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mBgPlayer.start();
-                    // 按照初始位置播放
-                    mBgPlayer.seekTo(msec);
-                }
-
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     public void switchOn() {
+        ivBggg.setVisibility(View.GONE);
         mIvBtn.setBackgroundResource(R.drawable.open);
+        mSurfaceView.setVisibility(View.VISIBLE);
         mSoundPool.play(mSoundOn, 1, 1, 0, 0, 1);
         isSwitchOn = true;
-        videoPlay(0);
+        myPlayer.seekTo(0);
+        myPlayer.start();
     }
 
     public void switchOff() {
         mIvBtn.setBackgroundResource(R.drawable.close);
         mSoundPool.play(mSoundOff, 1, 1, 0, 0, 1);
-        mBgPlayer.seekTo(0);
-        mBgPlayer.stop();
+        myPlayer.start();
+        myPlayer.seekTo(0);
+        myPlayer.pause();
         isSwitchOn = false;
     }
 

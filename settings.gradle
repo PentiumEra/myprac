@@ -1,1 +1,1 @@
-include ':app', ':myremoteview'
+include ':app', ':myremoteview', ':baselib'

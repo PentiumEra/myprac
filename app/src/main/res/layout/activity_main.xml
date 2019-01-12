@@ -23,6 +23,7 @@
         app:layout_constraintGuide_percent="0.75"
         android:id="@+id/gl_vertical_8"
         />
+   
     <SurfaceView
        android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"

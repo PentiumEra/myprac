@@ -31,5 +31,4 @@ public abstract class MvpBaseAcvity<V, T extends BasePresenter<V>> extends BaseA
     }
 
     protected abstract T createPresenter();
-    Bitmap
 }

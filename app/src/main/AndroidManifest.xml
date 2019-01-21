@@ -9,19 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".SurfaceActivity"></activity>
         <activity android:name="com.example.amber.view_chapter1.Main2Activity" />
         <activity android:name="com.example.mymvp.MvpActivity" />
         <activity android:name="com.example.myskip.Skip1Activity" />
-        <activity android:name="com.example.myskip.SkipTwoActivity" />
+        <activity android:name="com.example.myskip.SkipTwoActivity" ></activity>
         <activity android:name="com.example.myanimator.Anim01Activity" />
         <activity android:name="com.example.mymvp.RestActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name="com.example.myannotation.AnnotationActivity"></activity>
     </application>

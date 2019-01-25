@@ -1,1 +1,1 @@
-include  ':myremoteview', ':baselib', ':app2', ':butterknife_annotation', ':butterknife_compiler', ':butterknife'
+include  ':myremoteview', ':baselib', ':app2', ':butterknife_annotation', ':butterknife_compiler', ':butterknife', ':amberprac'
